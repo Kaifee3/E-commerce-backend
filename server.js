@@ -24,7 +24,7 @@ mongoose
   )
   .then(() => {
     app.listen(8081, () => {
-      console.log("Server started");
+      console.log("Server starteds");
     });
   });
 
