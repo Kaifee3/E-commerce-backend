@@ -83,9 +83,20 @@ const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
     
+    // Validate required fields
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    
     // Password validation: minimum 6 characters
-    if (!password || password.length < 6) {
+    if (password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters long" });
+    }
+    
+    // Check if user already exists
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already registered" });
     }
     
     const hashedpwd = await bcrypt.hash(password, 10);
@@ -98,8 +109,12 @@ const register = async (req, res) => {
     const result = await userModel.create(user);
     res.status(201).json(result);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Something went wrong" });
+    console.log("Register Error:", err);
+    // Handle MongoDB duplicate key error
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+    res.status(500).json({ message: "Something went wrong", error: err.message });
   }
 };
 
