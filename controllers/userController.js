@@ -28,6 +28,10 @@ const updateUser = async (req, res) => {
     const id = req.params.id;
     const body = req.body;
     if (body.password) {
+      // Password validation: minimum 6 characters
+      if (body.password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      }
       body.password = await bcrypt.hash(body.password, 10);
     }
     const result = await userModel.findByIdAndUpdate(id, body);
@@ -78,6 +82,12 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
+    
+    // Password validation: minimum 6 characters
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+    }
+    
     const hashedpwd = await bcrypt.hash(password, 10);
     const user = {
       firstName,
@@ -96,6 +106,11 @@ const register = async (req, res) => {
 const addUser = async (req, res) => {
   try {
     const body = req.body;
+    
+    if (!body.password || body.password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long" });
+    }
+    
     const hashedpwd = await bcrypt.hash(body.password, 10);
     body.password = hashedpwd;
     const result = await userModel.create(body);
@@ -109,11 +124,13 @@ const addUser = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const id = req.params.id
-    // console.log(id)
-    // const { firstName, lastName, email, password } = req.body;
+    
     const body = req.body;
     if (body.password) {
-      const hashedpwd = await bcrypt.hash(password, 10);
+      if (body.password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      }
+      const hashedpwd = await bcrypt.hash(body.password, 10);
       body.password = hashedpwd;
     }
     const result = await userModel.findByIdAndUpdate(id, body);
